@@ -26,6 +26,9 @@ const config = {
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
   ],
+  testEnvironmentOptions: {
+    customExportConditions: ['node', 'node-addons'],
+  },
 }
 
 module.exports = config
