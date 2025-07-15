@@ -3,7 +3,7 @@
 import { useEffect, useRef, FormEvent } from 'react'
 import { useChat } from './hooks/useChat'
 import { createStreamingMessage } from './lib/messageHelpers'
-import { UI_CONFIG } from './config/constants'
+import { UI_CONFIG, CSS_CLASSES } from './config/constants'
 import ChatHeader from './components/ChatHeader/ChatHeader'
 import ChatMessage from './components/ChatMessage/ChatMessage'
 import ChatInput from './components/ChatInput/ChatInput'
@@ -36,11 +36,11 @@ export default function Home() {
   }
 
   return (
-    <div className="chat-container">
+    <div className={CSS_CLASSES.CHAT_CONTAINER}>
       <ChatHeader onNewChat={startNewConversation} />
 
-      <main className="chat-main">
-        <div className="messages-container">
+      <main className={CSS_CLASSES.CHAT_MAIN}>
+        <div className={CSS_CLASSES.MESSAGES_CONTAINER}>
           {allMessages.map((msg) => (
             <ChatMessage 
               key={msg.id} 
@@ -57,7 +57,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="chat-footer">
+      <footer className={CSS_CLASSES.CHAT_FOOTER}>
         <ChatInput
           value={message}
           onChange={setMessage}

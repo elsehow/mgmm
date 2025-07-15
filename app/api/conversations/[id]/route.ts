@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { ConversationStorage } from '@/app/lib/storage'
+import { HTTP_STATUS, ERROR_MESSAGES, CONSOLE_MESSAGES } from '@/app/config/constants'
 
 const storage = ConversationStorage.getInstance()
 
@@ -12,17 +13,17 @@ export async function GET(
     
     if (!conversation) {
       return Response.json(
-        { error: 'Conversation not found' },
-        { status: 404 }
+        { error: ERROR_MESSAGES.CONVERSATION_NOT_FOUND },
+        { status: HTTP_STATUS.NOT_FOUND }
       )
     }
     
     return Response.json({ conversation })
   } catch (error) {
-    console.error('Error fetching conversation:', error)
+    console.error(CONSOLE_MESSAGES.ERRORS.ERROR_FETCHING_CONVERSATION, error)
     return Response.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR },
+      { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
     )
   }
 }

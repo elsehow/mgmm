@@ -1,4 +1,4 @@
-import { API_CONFIG, STREAM_EVENTS } from '@/app/config/constants'
+import { API_CONFIG, STREAM_EVENTS, ERROR_MESSAGES, CONSOLE_MESSAGES, STREAMING_CONFIG } from '@/app/config/constants'
 import { Conversation } from '@/app/lib/types/conversation'
 
 export interface ChatRequest {
@@ -29,14 +29,14 @@ export class ChatService {
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      throw new Error(ERROR_MESSAGES.HTTP_ERROR(response.status))
     }
 
     const reader = response.body?.getReader()
     const decoder = new TextDecoder()
 
     if (!reader) {
-      throw new Error('No reader available')
+      throw new Error(ERROR_MESSAGES.NO_READER_AVAILABLE)
     }
 
     try {
@@ -46,11 +46,11 @@ export class ChatService {
         if (done) break
 
         const chunk = decoder.decode(value)
-        const lines = chunk.split('\n')
+        const lines = chunk.split(STREAMING_CONFIG.LINE_SEPARATOR)
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6)
+          if (line.startsWith(STREAM_EVENTS.DATA_PREFIX)) {
+            const data = line.slice(STREAMING_CONFIG.DATA_SLICE_INDEX)
             
             if (data === STREAM_EVENTS.DONE) {
               handlers.onDone?.()
@@ -66,7 +66,7 @@ export class ChatService {
                 handlers.onContentDelta?.(parsed.delta.text)
               }
             } catch (e) {
-              console.error('Error parsing SSE data:', e)
+              console.error(CONSOLE_MESSAGES.ERRORS.ERROR_PARSING_SSE_DATA, e)
             }
           }
         }
@@ -87,7 +87,7 @@ export class ChatService {
       const { conversation } = await response.json()
       return conversation
     } catch (error) {
-      console.error('Error fetching conversation:', error)
+      console.error(CONSOLE_MESSAGES.ERRORS.ERROR_FETCHING_CONVERSATION, error)
       return null
     }
   }

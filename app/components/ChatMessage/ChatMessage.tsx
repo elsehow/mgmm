@@ -1,4 +1,5 @@
 import { Message } from '@/app/lib/types/conversation'
+import { CSS_CLASSES, MESSAGE_STATES, DATE_FORMAT } from '@/app/config/constants'
 import RetryButton from '../RetryButton/RetryButton'
 
 interface ChatMessageProps {
@@ -8,18 +9,15 @@ interface ChatMessageProps {
 
 export default function ChatMessage({ message, onRetry }: ChatMessageProps) {
   const formatTimestamp = (timestamp: string | Date) => {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })
+    return new Date(timestamp).toLocaleTimeString([], DATE_FORMAT.TIME_OPTIONS)
   }
 
   return (
-    <div className={`message ${message.role} ${message.pending ? 'pending' : ''} ${message.error ? 'error' : ''}`}>
-      <div className="message-content">
-        <div className="message-text">{message.content}</div>
-        <div className="message-time">
-          {message.pending ? 'Sending...' : message.error ? 'Failed' : formatTimestamp(message.timestamp)}
+    <div className={`${CSS_CLASSES.MESSAGE} ${message.role} ${message.pending ? MESSAGE_STATES.PENDING : ''} ${message.error ? MESSAGE_STATES.ERROR : ''}`}>
+      <div className={CSS_CLASSES.MESSAGE_CONTENT}>
+        <div className={CSS_CLASSES.MESSAGE_TEXT}>{message.content}</div>
+        <div className={CSS_CLASSES.MESSAGE_TIME}>
+          {message.pending ? MESSAGE_STATES.SENDING : message.error ? MESSAGE_STATES.FAILED : formatTimestamp(message.timestamp)}
           {message.error && onRetry && (
             <RetryButton onClick={() => onRetry(message)} />
           )}

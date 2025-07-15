@@ -1,9 +1,10 @@
 import { Message } from './types/conversation'
+import { MESSAGE_ROLES } from '@/app/config/constants'
 
 export function createPendingMessage(content: string): Message {
   return {
     id: `pending-${Date.now()}`,
-    role: 'user',
+    role: MESSAGE_ROLES.USER,
     content,
     timestamp: new Date(),
     pending: true,
@@ -14,7 +15,7 @@ export function createPendingMessage(content: string): Message {
 export function createStreamingMessage(content: string): Message {
   return {
     id: 'streaming',
-    role: 'assistant',
+    role: MESSAGE_ROLES.ASSISTANT,
     content,
     timestamp: new Date()
   }

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { ConversationStorage } from '@/app/lib/storage'
 import { messagesToAnthropicFormat } from '@/app/lib/types/conversation'
-import { API_CONFIG } from '@/app/config/constants'
+import { API_CONFIG, HTTP_STATUS, ERROR_MESSAGES, STREAMING_CONFIG } from '@/app/config/constants'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -15,14 +15,14 @@ export async function POST(request: NextRequest) {
     const { message, conversationId, userId = API_CONFIG.USERS.DEFAULT_USER_ID } = await request.json()
 
     if (!message) {
-      return new Response('Message is required', { status: 400 })
+      return new Response(ERROR_MESSAGES.MESSAGE_REQUIRED, { status: HTTP_STATUS.BAD_REQUEST })
     }
 
     let conversation
     if (conversationId) {
       conversation = await storage.getConversation(conversationId)
       if (!conversation) {
-        return new Response('Conversation not found', { status: 404 })
+        return new Response(ERROR_MESSAGES.CONVERSATION_NOT_FOUND, { status: HTTP_STATUS.NOT_FOUND })
       }
     } else {
       conversation = await storage.createConversation(userId)
@@ -32,13 +32,13 @@ export async function POST(request: NextRequest) {
 
     const updatedConversation = await storage.getConversation(conversation.id)
     if (!updatedConversation) {
-      return new Response('Error retrieving conversation', { status: 500 })
+      return new Response(ERROR_MESSAGES.ERROR_RETRIEVING_CONVERSATION, { status: HTTP_STATUS.INTERNAL_SERVER_ERROR })
     }
 
     const anthropicMessages = messagesToAnthropicFormat(updatedConversation.messages)
 
     const stream = await anthropic.messages.create({
-      max_tokens: 1024,
+      max_tokens: API_CONFIG.LIMITS.MAX_TOKENS,
       messages: anthropicMessages,
       model: API_CONFIG.MODELS.CLAUDE_SONNET,
       stream: true,
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
           
           await storage.addMessage(conversation.id, 'assistant', assistantResponse)
           
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+          controller.enqueue(encoder.encode(STREAMING_CONFIG.DONE_EVENT))
           controller.close()
         } catch (error) {
           controller.error(error)
@@ -80,19 +80,15 @@ export async function POST(request: NextRequest) {
     })
 
     return new Response(readableStream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
+      headers: STREAMING_CONFIG.RESPONSE_HEADERS,
     })
   } catch (error) {
     console.error('Error in chat route:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR }),
       { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        headers: { [API_CONFIG.HEADERS.CONTENT_TYPE]: API_CONFIG.HEADERS.APPLICATION_JSON },
       }
     )
   }

@@ -1,3 +1,5 @@
+import { CSS_CLASSES } from '@/app/config/constants'
+
 interface RetryButtonProps {
   onClick: () => void
   disabled?: boolean
@@ -8,7 +10,7 @@ export default function RetryButton({ onClick, disabled = false }: RetryButtonPr
     <button 
       onClick={onClick}
       disabled={disabled}
-      className="retry-button"
+      className={CSS_CLASSES.RETRY_BUTTON}
     >
       Retry
     </button>

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { Message, Conversation } from '@/app/lib/types/conversation'
 import { ChatService } from '@/app/services/chatService'
+import { CONSOLE_MESSAGES } from '@/app/config/constants'
 import { useOptimisticMessages } from './useOptimisticMessages'
 import { useStreamingResponse } from './useStreamingResponse'
 
@@ -69,14 +70,14 @@ export function useChat() {
             }
           },
           onError: (error) => {
-            console.error('Chat error:', error)
+            console.error(CONSOLE_MESSAGES.ERRORS.CHAT_ERROR, error)
             stopStreaming()
             markMessageError(pendingMessage.id)
           }
         }
       )
     } catch (error) {
-      console.error('Send message error:', error)
+      console.error(CONSOLE_MESSAGES.ERRORS.SEND_MESSAGE_ERROR, error)
       stopStreaming()
       markMessageError(pendingMessage.id)
     }
@@ -128,14 +129,14 @@ export function useChat() {
             }
           },
           onError: (error) => {
-            console.error('Retry error:', error)
+            console.error(CONSOLE_MESSAGES.ERRORS.RETRY_ERROR, error)
             stopStreaming()
             markMessageError(failedMessage.id)
           }
         }
       )
     } catch (error) {
-      console.error('Retry message error:', error)
+      console.error(CONSOLE_MESSAGES.ERRORS.RETRY_MESSAGE_ERROR, error)
       stopStreaming()
       markMessageError(failedMessage.id)
     }
