@@ -3,7 +3,6 @@ export const API_CONFIG = {
   ENDPOINTS: {
     CHAT: '/api/chat',
     CONVERSATIONS: '/api/conversations',
-    CONVERSATION_BY_ID: (id: string) => `/api/conversations/${id}`,
   },
   HEADERS: {
     CONTENT_TYPE: 'Content-Type',

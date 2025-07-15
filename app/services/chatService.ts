@@ -3,7 +3,6 @@ import { Conversation } from '@/app/lib/types/conversation'
 
 export interface ChatRequest {
   message: string
-  conversationId?: string
   date?: string
   userId?: string
 }
@@ -24,7 +23,6 @@ export class ChatService {
       },
       body: JSON.stringify({
         message: request.message,
-        conversationId: request.conversationId,
         date: request.date,
         userId: request.userId || API_CONFIG.USERS.DEFAULT_USER_ID,
       }),
@@ -78,21 +76,6 @@ export class ChatService {
     }
   }
 
-  async getConversation(conversationId: string): Promise<Conversation | null> {
-    try {
-      const response = await fetch(API_CONFIG.ENDPOINTS.CONVERSATION_BY_ID(conversationId))
-      
-      if (!response.ok) {
-        return null
-      }
-
-      const { conversation } = await response.json()
-      return conversation
-    } catch (error) {
-      console.error(CONSOLE_MESSAGES.ERRORS.ERROR_FETCHING_CONVERSATION, error)
-      return null
-    }
-  }
 
   async getConversationByDate(date: string, userId: string = API_CONFIG.USERS.DEFAULT_USER_ID): Promise<Conversation | null> {
     try {

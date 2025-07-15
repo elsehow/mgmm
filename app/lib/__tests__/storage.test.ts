@@ -1,7 +1,5 @@
 import { promises as fs } from 'fs'
-import path from 'path'
 import { ConversationStorage } from '../storage'
-import { Conversation, Message } from '../types/conversation'
 
 // Mock fs module
 jest.mock('fs', () => ({
@@ -55,9 +53,9 @@ describe('ConversationStorage', () => {
       })
 
       it('should return conversation for existing date', async () => {
-        const mockConversation = createMockConversation(testDateString, testUserId, testDate, [
-          createMockMessage('msg1', 'user', 'Hello', testDate),
-          createMockMessage('msg2', 'assistant', 'Hi there!', testDate),
+        const mockConversation = global.createMockConversation(testDateString, testUserId, testDate, [
+          global.createMockMessage('msg1', 'user', 'Hello', testDate),
+          global.createMockMessage('msg2', 'assistant', 'Hi there!', testDate),
         ])
 
         mockFs.readFile.mockResolvedValue(JSON.stringify(mockConversation))
@@ -73,7 +71,7 @@ describe('ConversationStorage', () => {
       })
 
       it('should return null for wrong user', async () => {
-        const mockConversation = createMockConversation(testDateString, 'other-user', testDate)
+        const mockConversation = global.createMockConversation(testDateString, 'other-user', testDate)
         mockFs.readFile.mockResolvedValue(JSON.stringify(mockConversation))
 
         const result = await storage.getConversationByDate(testUserId, testDate)
@@ -82,8 +80,8 @@ describe('ConversationStorage', () => {
       })
 
       it('should properly parse dates from JSON', async () => {
-        const mockConversation = createMockConversation(testDateString, testUserId, testDate, [
-          createMockMessage('msg1', 'user', 'Hello', testDate),
+        const mockConversation = global.createMockConversation(testDateString, testUserId, testDate, [
+          global.createMockMessage('msg1', 'user', 'Hello', testDate),
         ])
 
         mockFs.readFile.mockResolvedValue(JSON.stringify(mockConversation))
@@ -162,14 +160,14 @@ describe('ConversationStorage', () => {
           '2024-01-16.json',
           'some-uuid-123.json',
           'invalid-file.txt',
-        ])
+        ] as any)
 
         // Mock conversations with messages
-        const mockConversation1 = createMockConversation('2024-01-15', testUserId, testDate, [
-          createMockMessage('msg1', 'user', 'Hello', testDate),
+        const mockConversation1 = global.createMockConversation('2024-01-15', testUserId, testDate, [
+          global.createMockMessage('msg1', 'user', 'Hello', testDate),
         ])
-        const mockConversation2 = createMockConversation('2024-01-16', testUserId, testDate, [
-          createMockMessage('msg2', 'user', 'Hi', testDate),
+        const mockConversation2 = global.createMockConversation('2024-01-16', testUserId, testDate, [
+          global.createMockMessage('msg2', 'user', 'Hi', testDate),
         ])
 
         mockFs.readFile
@@ -182,13 +180,13 @@ describe('ConversationStorage', () => {
       })
 
       it('should filter by user ID', async () => {
-        mockFs.readdir.mockResolvedValue(['2024-01-15.json', '2024-01-16.json'])
+        mockFs.readdir.mockResolvedValue(['2024-01-15.json', '2024-01-16.json'] as any)
 
-        const userConversation = createMockConversation('2024-01-15', testUserId, testDate, [
-          createMockMessage('msg1', 'user', 'Hello', testDate),
+        const userConversation = global.createMockConversation('2024-01-15', testUserId, testDate, [
+          global.createMockMessage('msg1', 'user', 'Hello', testDate),
         ])
-        const otherUserConversation = createMockConversation('2024-01-16', 'other-user', testDate, [
-          createMockMessage('msg2', 'user', 'Hi', testDate),
+        const otherUserConversation = global.createMockConversation('2024-01-16', 'other-user', testDate, [
+          global.createMockMessage('msg2', 'user', 'Hi', testDate),
         ])
 
         mockFs.readFile
@@ -201,9 +199,9 @@ describe('ConversationStorage', () => {
       })
 
       it('should exclude conversations with no messages', async () => {
-        mockFs.readdir.mockResolvedValue(['2024-01-15.json'])
+        mockFs.readdir.mockResolvedValue(['2024-01-15.json'] as any)
 
-        const emptyConversation = createMockConversation('2024-01-15', testUserId, testDate, [])
+        const emptyConversation = global.createMockConversation('2024-01-15', testUserId, testDate, [])
         mockFs.readFile.mockResolvedValue(JSON.stringify(emptyConversation))
 
         const result = await storage.getAvailableDates(testUserId)
@@ -212,11 +210,11 @@ describe('ConversationStorage', () => {
       })
 
       it('should handle file read errors gracefully', async () => {
-        mockFs.readdir.mockResolvedValue(['2024-01-15.json', '2024-01-16.json'])
+        mockFs.readdir.mockResolvedValue(['2024-01-15.json', '2024-01-16.json'] as any)
         mockFs.readFile
           .mockRejectedValueOnce(new Error('File read error'))
-          .mockResolvedValueOnce(JSON.stringify(createMockConversation('2024-01-16', testUserId, testDate, [
-            createMockMessage('msg1', 'user', 'Hello', testDate),
+          .mockResolvedValueOnce(JSON.stringify(global.createMockConversation('2024-01-16', testUserId, testDate, [
+            global.createMockMessage('msg1', 'user', 'Hello', testDate),
           ])))
 
         const result = await storage.getAvailableDates(testUserId)
@@ -235,8 +233,8 @@ describe('ConversationStorage', () => {
 
     describe('addMessageToDateConversation', () => {
       it('should add message to existing conversation', async () => {
-        const existingConversation = createMockConversation(testDateString, testUserId, testDate, [
-          createMockMessage('msg1', 'user', 'Hello', testDate),
+        const existingConversation = global.createMockConversation(testDateString, testUserId, testDate, [
+          global.createMockMessage('msg1', 'user', 'Hello', testDate),
         ])
 
         mockFs.readFile.mockResolvedValue(JSON.stringify(existingConversation))
@@ -275,7 +273,7 @@ describe('ConversationStorage', () => {
 
       it('should update conversation timestamps', async () => {
         const originalDate = new Date('2024-01-15T10:00:00.000Z')
-        const existingConversation = createMockConversation(testDateString, testUserId, originalDate)
+        const existingConversation = global.createMockConversation(testDateString, testUserId, originalDate)
 
         mockFs.readFile.mockResolvedValue(JSON.stringify(existingConversation))
         mockFs.writeFile.mockResolvedValue(undefined)
@@ -295,63 +293,10 @@ describe('ConversationStorage', () => {
     })
   })
 
-  describe('Legacy Operations', () => {
-    describe('createConversation', () => {
-      beforeEach(() => {
-        mockFs.access.mockRejectedValue({ code: 'ENOENT' })
-        mockFs.mkdir.mockResolvedValue(undefined)
-        mockFs.writeFile.mockResolvedValue(undefined)
-      })
-
-      it('should create conversation with UUID', async () => {
-        const result = await storage.createConversation(testUserId)
-        
-        expect(result.id).toBe('mock-uuid-12345')
-        expect(result.userId).toBe(testUserId)
-        expect(result.messages).toHaveLength(0)
-        expect(result.createdAt).toBeInstanceOf(Date)
-        expect(result.updatedAt).toBeInstanceOf(Date)
-      })
-    })
-
-    describe('getConversation', () => {
-      it('should retrieve conversation by UUID', async () => {
-        const mockConversation = createMockConversation('mock-uuid-12345', testUserId, testDate)
-        mockFs.readFile.mockResolvedValue(JSON.stringify(mockConversation))
-
-        const result = await storage.getConversation('mock-uuid-12345')
-        
-        expect(result?.id).toBe('mock-uuid-12345')
-        expect(result?.userId).toBe(testUserId)
-      })
-    })
-
-    describe('addMessage', () => {
-      it('should add message to existing conversation', async () => {
-        const existingConversation = createMockConversation('mock-uuid-12345', testUserId, testDate)
-        mockFs.readFile.mockResolvedValue(JSON.stringify(existingConversation))
-        mockFs.writeFile.mockResolvedValue(undefined)
-
-        const result = await storage.addMessage('mock-uuid-12345', 'user', 'Hello')
-        
-        expect(result.content).toBe('Hello')
-        expect(result.role).toBe('user')
-        expect(result.id).toBe('mock-uuid-12345')
-      })
-
-      it('should throw error for non-existent conversation', async () => {
-        mockFs.readFile.mockRejectedValue({ code: 'ENOENT' })
-
-        await expect(storage.addMessage('non-existent', 'user', 'Hello'))
-          .rejects.toThrow('Conversation non-existent not found')
-      })
-    })
-  })
-
   describe('File System Error Handling', () => {
     it('should handle permission errors', async () => {
       mockFs.access.mockRejectedValue({ code: 'ENOENT' })
-      const permissionError = new Error('Permission denied')
+      const permissionError = new Error('Permission denied') as any
       permissionError.code = 'EACCES'
       mockFs.mkdir.mockRejectedValue(permissionError)
 
@@ -362,7 +307,7 @@ describe('ConversationStorage', () => {
     it('should handle disk space errors', async () => {
       mockFs.access.mockRejectedValue({ code: 'ENOENT' })
       mockFs.mkdir.mockResolvedValue(undefined)
-      const diskSpaceError = new Error('No space left on device')
+      const diskSpaceError = new Error('No space left on device') as any
       diskSpaceError.code = 'ENOSPC'
       mockFs.writeFile.mockRejectedValue(diskSpaceError)
 
@@ -391,9 +336,9 @@ describe('ConversationStorage', () => {
       // Reset mocks for clean state
       mockFs.access.mockResolvedValue(undefined)
       mockFs.mkdir.mockResolvedValue(undefined)
-      mockFs.readdir.mockResolvedValue(['2024-01-15.json'])
-      const mockConversation = createMockConversation('2024-01-15', '', testDate, [
-        createMockMessage('msg1', 'user', 'Hello', testDate),
+      mockFs.readdir.mockResolvedValue(['2024-01-15.json'] as any)
+      const mockConversation = global.createMockConversation('2024-01-15', '', testDate, [
+        global.createMockMessage('msg1', 'user', 'Hello', testDate),
       ])
       mockFs.readFile.mockResolvedValue(JSON.stringify(mockConversation))
 

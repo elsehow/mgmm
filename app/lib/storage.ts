@@ -26,9 +26,6 @@ export class ConversationStorage {
     }
   }
 
-  private getConversationPath(conversationId: string): string {
-    return path.join(STORAGE_DIR, `${conversationId}${STORAGE_CONFIG.FILE_EXTENSION}`)
-  }
 
   private getDateBasedPath(date: string): string {
     return path.join(STORAGE_DIR, `${date}${STORAGE_CONFIG.FILE_EXTENSION}`)
@@ -38,66 +35,8 @@ export class ConversationStorage {
     return date.toISOString().split('T')[0] // YYYY-MM-DD format
   }
 
-  async createConversation(userId: string): Promise<Conversation> {
-    await this.ensureStorageDir()
-    
-    const conversation: Conversation = {
-      id: randomUUID(),
-      userId,
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
 
-    const filePath = this.getConversationPath(conversation.id)
-    await fs.writeFile(filePath, JSON.stringify(conversation, null, STORAGE_CONFIG.JSON_SPACING))
-    
-    return conversation
-  }
 
-  async getConversation(conversationId: string): Promise<Conversation | null> {
-    try {
-      const filePath = this.getConversationPath(conversationId)
-      const data = await fs.readFile(filePath, STORAGE_CONFIG.ENCODING)
-      const conversation = JSON.parse(data) as Conversation
-      
-      conversation.createdAt = new Date(conversation.createdAt)
-      conversation.updatedAt = new Date(conversation.updatedAt)
-      conversation.messages = conversation.messages.map(msg => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp)
-      }))
-      
-      return conversation
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === STORAGE_CONFIG.ERROR_CODES.FILE_NOT_FOUND) {
-        return null
-      }
-      throw error
-    }
-  }
-
-  async addMessage(conversationId: string, role: 'user' | 'assistant', content: string): Promise<Message> {
-    const conversation = await this.getConversation(conversationId)
-    if (!conversation) {
-      throw new Error(`Conversation ${conversationId} not found`)
-    }
-
-    const message: Message = {
-      id: randomUUID(),
-      role,
-      content,
-      timestamp: new Date()
-    }
-
-    conversation.messages.push(message)
-    conversation.updatedAt = new Date()
-
-    const filePath = this.getConversationPath(conversationId)
-    await fs.writeFile(filePath, JSON.stringify(conversation, null, STORAGE_CONFIG.JSON_SPACING))
-    
-    return message
-  }
 
   async getConversationByDate(userId: string, date: Date): Promise<Conversation | null> {
     const dateStr = this.formatDateForStorage(date)
