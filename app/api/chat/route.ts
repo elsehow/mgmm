@@ -2,8 +2,7 @@ import { NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { ConversationStorage } from '@/app/lib/storage'
 import { messagesToAnthropicFormat } from '@/app/lib/types/conversation'
-
-const MODEL = 'claude-sonnet-4-20250514'
+import { API_CONFIG } from '@/app/config/constants'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -13,7 +12,7 @@ const storage = ConversationStorage.getInstance()
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, conversationId, userId = 'default-user' } = await request.json()
+    const { message, conversationId, userId = API_CONFIG.USERS.DEFAULT_USER_ID } = await request.json()
 
     if (!message) {
       return new Response('Message is required', { status: 400 })
@@ -41,7 +40,7 @@ export async function POST(request: NextRequest) {
     const stream = await anthropic.messages.create({
       max_tokens: 1024,
       messages: anthropicMessages,
-      model: MODEL,
+      model: API_CONFIG.MODELS.CLAUDE_SONNET,
       stream: true,
     })
 
@@ -57,7 +56,7 @@ export async function POST(request: NextRequest) {
 
           for await (const messageStreamEvent of stream) {
             if (messageStreamEvent.type === 'content_block_delta') {
-              const text = messageStreamEvent.delta.text || ''
+              const text = (messageStreamEvent.delta as any).text || ''
               assistantResponse += text
               
               const chunk = encoder.encode(
