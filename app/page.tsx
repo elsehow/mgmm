@@ -19,7 +19,10 @@ export default function Home() {
     streamingMessage,
     sendMessage,
     retryMessage,
-    startNewConversation,
+    currentDate,
+    availableDates,
+    navigateDirection,
+    goToToday,
   } = useChat()
 
   const scrollToBottom = () => {
@@ -37,7 +40,12 @@ export default function Home() {
 
   return (
     <div className={CSS_CLASSES.CHAT_CONTAINER}>
-      <ChatHeader onNewChat={startNewConversation} />
+      <ChatHeader 
+        currentDate={currentDate}
+        availableDates={availableDates}
+        onNavigate={navigateDirection}
+        onGoToToday={goToToday}
+      />
 
       <main className={CSS_CLASSES.CHAT_MAIN}>
         <div className={CSS_CLASSES.MESSAGES_CONTAINER}>

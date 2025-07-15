@@ -4,6 +4,7 @@ import { Conversation } from '@/app/lib/types/conversation'
 export interface ChatRequest {
   message: string
   conversationId?: string
+  date?: string
   userId?: string
 }
 
@@ -24,6 +25,7 @@ export class ChatService {
       body: JSON.stringify({
         message: request.message,
         conversationId: request.conversationId,
+        date: request.date,
         userId: request.userId || API_CONFIG.USERS.DEFAULT_USER_ID,
       }),
     })
@@ -89,6 +91,38 @@ export class ChatService {
     } catch (error) {
       console.error(CONSOLE_MESSAGES.ERRORS.ERROR_FETCHING_CONVERSATION, error)
       return null
+    }
+  }
+
+  async getConversationByDate(date: string, userId: string = API_CONFIG.USERS.DEFAULT_USER_ID): Promise<Conversation | null> {
+    try {
+      const response = await fetch(`/api/conversations/by-date/${date}?userId=${userId}`)
+      
+      if (!response.ok) {
+        return null
+      }
+
+      const { conversation } = await response.json()
+      return conversation
+    } catch (error) {
+      console.error(CONSOLE_MESSAGES.ERRORS.ERROR_FETCHING_CONVERSATION, error)
+      return null
+    }
+  }
+
+  async getAvailableDates(userId: string = API_CONFIG.USERS.DEFAULT_USER_ID): Promise<string[]> {
+    try {
+      const response = await fetch(`/api/conversations/dates?userId=${userId}`)
+      
+      if (!response.ok) {
+        return []
+      }
+
+      const { dates } = await response.json()
+      return dates
+    } catch (error) {
+      console.error(CONSOLE_MESSAGES.ERRORS.ERROR_FETCHING_CONVERSATIONS, error)
+      return []
     }
   }
 }

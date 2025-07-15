@@ -1,15 +1,17 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { Message, Conversation } from '@/app/lib/types/conversation'
 import { ChatService } from '@/app/services/chatService'
 import { CONSOLE_MESSAGES } from '@/app/config/constants'
 import { useOptimisticMessages } from './useOptimisticMessages'
 import { useStreamingResponse } from './useStreamingResponse'
+import { useDateNavigation } from './useDateNavigation'
 
 const chatService = new ChatService()
 
 export function useChat() {
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null)
   const [message, setMessage] = useState('')
+  const dateNavigation = useDateNavigation()
   
   const {
     optimisticMessages,
@@ -34,6 +36,17 @@ export function useChat() {
     return [...conversationMessages, ...optimisticMessages]
   }, [currentConversation?.messages, optimisticMessages])
 
+  // Load conversation when date changes
+  useEffect(() => {
+    const loadConversation = async () => {
+      const conversation = await chatService.getConversationByDate(dateNavigation.currentDateString)
+      setCurrentConversation(conversation)
+      clearOptimisticMessages()
+    }
+    
+    loadConversation()
+  }, [dateNavigation.currentDateString, clearOptimisticMessages])
+
   const sendMessage = useCallback(async (messageContent: string) => {
     if (!messageContent.trim() || isStreaming) return
 
@@ -48,7 +61,7 @@ export function useChat() {
       await chatService.sendMessage(
         {
           message: messageContent,
-          conversationId: currentConversation?.id,
+          date: dateNavigation.currentDateString,
         },
         {
           onConversationId: (conversationId) => {
@@ -61,13 +74,15 @@ export function useChat() {
           onDone: async () => {
             stopStreaming()
             
-            if (newConversationId) {
-              const conversation = await chatService.getConversation(newConversationId)
-              if (conversation) {
-                setCurrentConversation(conversation)
-                clearOptimisticMessages()
-              }
+            // Reload the conversation for the current date
+            const conversation = await chatService.getConversationByDate(dateNavigation.currentDateString)
+            if (conversation) {
+              setCurrentConversation(conversation)
+              clearOptimisticMessages()
             }
+            
+            // Refresh available dates
+            dateNavigation.refreshAvailableDates()
           },
           onError: (error) => {
             console.error(CONSOLE_MESSAGES.ERRORS.CHAT_ERROR, error)
@@ -83,7 +98,7 @@ export function useChat() {
     }
   }, [
     isStreaming,
-    currentConversation?.id,
+    dateNavigation.currentDateString,
     addOptimisticMessage,
     markMessageSent,
     markMessageError,
@@ -91,7 +106,8 @@ export function useChat() {
     appendToStream,
     stopStreaming,
     resetStream,
-    clearOptimisticMessages
+    clearOptimisticMessages,
+    dateNavigation.refreshAvailableDates
   ])
 
   const retryMessage = useCallback(async (failedMessage: Message) => {
@@ -107,7 +123,7 @@ export function useChat() {
       await chatService.sendMessage(
         {
           message: failedMessage.content,
-          conversationId: currentConversation?.id,
+          date: dateNavigation.currentDateString,
         },
         {
           onConversationId: (conversationId) => {
@@ -120,13 +136,15 @@ export function useChat() {
           onDone: async () => {
             stopStreaming()
             
-            if (newConversationId) {
-              const conversation = await chatService.getConversation(newConversationId)
-              if (conversation) {
-                setCurrentConversation(conversation)
-                clearOptimisticMessages()
-              }
+            // Reload the conversation for the current date
+            const conversation = await chatService.getConversationByDate(dateNavigation.currentDateString)
+            if (conversation) {
+              setCurrentConversation(conversation)
+              clearOptimisticMessages()
             }
+            
+            // Refresh available dates
+            dateNavigation.refreshAvailableDates()
           },
           onError: (error) => {
             console.error(CONSOLE_MESSAGES.ERRORS.RETRY_ERROR, error)
@@ -142,7 +160,7 @@ export function useChat() {
     }
   }, [
     isStreaming,
-    currentConversation?.id,
+    dateNavigation.currentDateString,
     markMessageRetrying,
     markMessageSent,
     markMessageError,
@@ -150,14 +168,10 @@ export function useChat() {
     appendToStream,
     stopStreaming,
     resetStream,
-    clearOptimisticMessages
+    clearOptimisticMessages,
+    dateNavigation.refreshAvailableDates
   ])
 
-  const startNewConversation = useCallback(() => {
-    setCurrentConversation(null)
-    clearOptimisticMessages()
-    stopStreaming()
-  }, [clearOptimisticMessages, stopStreaming])
 
   return {
     // State
@@ -168,9 +182,11 @@ export function useChat() {
     isStreaming,
     streamingMessage,
     
+    // Date navigation
+    ...dateNavigation,
+    
     // Actions
     sendMessage,
     retryMessage,
-    startNewConversation,
   }
 }

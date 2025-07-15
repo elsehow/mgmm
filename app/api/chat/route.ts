@@ -12,30 +12,46 @@ const storage = ConversationStorage.getInstance()
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, conversationId, userId = API_CONFIG.USERS.DEFAULT_USER_ID } = await request.json()
+    const { message, conversationId, date, userId = API_CONFIG.USERS.DEFAULT_USER_ID } = await request.json()
 
     if (!message) {
       return new Response(ERROR_MESSAGES.MESSAGE_REQUIRED, { status: HTTP_STATUS.BAD_REQUEST })
     }
 
     let conversation
-    if (conversationId) {
+    if (date) {
+      // Date-based conversation
+      const dateObj = new Date(date + 'T00:00:00.000Z')
+      conversation = await storage.getConversationByDate(userId, dateObj)
+      if (!conversation) {
+        conversation = await storage.createConversationForDate(userId, dateObj)
+      }
+      await storage.addMessageToDateConversation(userId, dateObj, 'user', message)
+      conversation = await storage.getConversationByDate(userId, dateObj)
+    } else if (conversationId) {
+      // Legacy conversation ID based
       conversation = await storage.getConversation(conversationId)
       if (!conversation) {
         return new Response(ERROR_MESSAGES.CONVERSATION_NOT_FOUND, { status: HTTP_STATUS.NOT_FOUND })
       }
+      await storage.addMessage(conversation.id, 'user', message)
+      conversation = await storage.getConversation(conversation.id)
     } else {
-      conversation = await storage.createConversation(userId)
+      // Default to today's conversation
+      const today = new Date()
+      conversation = await storage.getConversationByDate(userId, today)
+      if (!conversation) {
+        conversation = await storage.createConversationForDate(userId, today)
+      }
+      await storage.addMessageToDateConversation(userId, today, 'user', message)
+      conversation = await storage.getConversationByDate(userId, today)
     }
 
-    await storage.addMessage(conversation.id, 'user', message)
-
-    const updatedConversation = await storage.getConversation(conversation.id)
-    if (!updatedConversation) {
+    if (!conversation) {
       return new Response(ERROR_MESSAGES.ERROR_RETRIEVING_CONVERSATION, { status: HTTP_STATUS.INTERNAL_SERVER_ERROR })
     }
 
-    const anthropicMessages = messagesToAnthropicFormat(updatedConversation.messages)
+    const anthropicMessages = messagesToAnthropicFormat(conversation.messages)
 
     const stream = await anthropic.messages.create({
       max_tokens: API_CONFIG.LIMITS.MAX_TOKENS,
@@ -69,7 +85,13 @@ export async function POST(request: NextRequest) {
             }
           }
           
-          await storage.addMessage(conversation.id, 'assistant', assistantResponse)
+          // Add assistant response to the conversation
+          if (date) {
+            const dateObj = new Date(date + 'T00:00:00.000Z')
+            await storage.addMessageToDateConversation(userId, dateObj, 'assistant', assistantResponse)
+          } else {
+            await storage.addMessage(conversation.id, 'assistant', assistantResponse)
+          }
           
           controller.enqueue(encoder.encode(STREAMING_CONFIG.DONE_EVENT))
           controller.close()

@@ -1,17 +1,27 @@
-import { CSS_CLASSES, UI_CONFIG } from '@/app/config/constants'
+import { CSS_CLASSES } from '@/app/config/constants'
+import DateNavigation from '../DateNavigation/DateNavigation'
 
 interface ChatHeaderProps {
-  title?: string
-  onNewChat: () => void
+  currentDate: Date
+  availableDates: string[]
+  onNavigate: (direction: 'prev' | 'next') => void
+  onGoToToday: () => void
 }
 
-export default function ChatHeader({ title = UI_CONFIG.CHAT.DEFAULT_TITLE, onNewChat }: ChatHeaderProps) {
+export default function ChatHeader({ 
+  currentDate, 
+  availableDates, 
+  onNavigate, 
+  onGoToToday 
+}: ChatHeaderProps) {
   return (
     <header className={CSS_CLASSES.CHAT_HEADER}>
-      <h1>{title}</h1>
-      <button onClick={onNewChat} className={CSS_CLASSES.NEW_CHAT_BTN}>
-        New Chat
-      </button>
+      <DateNavigation
+        currentDate={currentDate}
+        availableDates={availableDates}
+        onNavigate={onNavigate}
+        onGoToToday={onGoToToday}
+      />
     </header>
   )
 }

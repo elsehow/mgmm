@@ -1,18 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { fn } from '@storybook/test'
-import ChatHeader from './ChatHeader'
+import DateNavigation from './DateNavigation'
 
-const meta: Meta<typeof ChatHeader> = {
-  title: 'Components/ChatHeader',
-  component: ChatHeader,
+const meta: Meta<typeof DateNavigation> = {
+  title: 'Components/DateNavigation',
+  component: DateNavigation,
   parameters: {
     layout: 'padded',
   },
   tags: ['autodocs'],
-  args: {
-    onNavigate: fn(),
-    onGoToToday: fn(),
-  },
 }
 
 export default meta
@@ -31,6 +26,8 @@ export const Today: Story = {
   args: {
     currentDate: new Date(),
     availableDates: mockAvailableDates,
+    onNavigate: (direction) => console.log('Navigate:', direction),
+    onGoToToday: () => console.log('Go to today'),
   },
 }
 
@@ -38,6 +35,8 @@ export const Yesterday: Story = {
   args: {
     currentDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
     availableDates: mockAvailableDates,
+    onNavigate: (direction) => console.log('Navigate:', direction),
+    onGoToToday: () => console.log('Go to today'),
   },
 }
 
@@ -45,6 +44,8 @@ export const OlderDate: Story = {
   args: {
     currentDate: new Date('2024-01-10'),
     availableDates: mockAvailableDates,
+    onNavigate: (direction) => console.log('Navigate:', direction),
+    onGoToToday: () => console.log('Go to today'),
   },
 }
 
@@ -52,6 +53,8 @@ export const FirstDate: Story = {
   args: {
     currentDate: new Date('2024-01-10'),
     availableDates: ['2024-01-10', '2024-01-11', '2024-01-12'],
+    onNavigate: (direction) => console.log('Navigate:', direction),
+    onGoToToday: () => console.log('Go to today'),
   },
 }
 
@@ -59,6 +62,8 @@ export const LastDate: Story = {
   args: {
     currentDate: new Date('2024-01-12'),
     availableDates: ['2024-01-10', '2024-01-11', '2024-01-12'],
+    onNavigate: (direction) => console.log('Navigate:', direction),
+    onGoToToday: () => console.log('Go to today'),
   },
 }
 
@@ -66,5 +71,7 @@ export const NoAvailableDates: Story = {
   args: {
     currentDate: new Date(),
     availableDates: [],
+    onNavigate: (direction) => console.log('Navigate:', direction),
+    onGoToToday: () => console.log('Go to today'),
   },
 }
