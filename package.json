@@ -16,7 +16,8 @@
     "@anthropic-ai/sdk": "^0.24.0",
     "next": "14.2.0",
     "react": "18.3.0",
-    "react-dom": "18.3.0"
+    "react-dom": "18.3.0",
+    "timeago.js": "^4.0.2"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.6.0",

@@ -2,36 +2,32 @@ export function formatDateForStorage(date: Date): string {
   return date.toISOString().split('T')[0] // YYYY-MM-DD format
 }
 
+import { format } from 'timeago.js'
+
 export function formatRelativeDate(date: Date): string {
   const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(today.getDate() - 1)
-  
   const targetDate = new Date(date)
   
   // Normalize dates to compare only date parts (not time)
   const normalizeDate = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
   
   const normalizedToday = normalizeDate(today)
-  const normalizedYesterday = normalizeDate(yesterday)
   const normalizedTarget = normalizeDate(targetDate)
   
+  // Check if it's today
   if (normalizedTarget.getTime() === normalizedToday.getTime()) {
     return 'Today'
-  } else if (normalizedTarget.getTime() === normalizedYesterday.getTime()) {
-    return 'Yesterday'
-  } else {
-    const diffTime = normalizedToday.getTime() - normalizedTarget.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    if (diffDays > 0 && diffDays <= 7) {
-      return `${diffDays} days ago`
-    } else if (diffDays < 0) {
-      return targetDate.toLocaleDateString()
-    } else {
-      return targetDate.toLocaleDateString()
-    }
   }
+  
+  // Check if it's yesterday
+  const yesterday = new Date(normalizedToday)
+  yesterday.setDate(yesterday.getDate() - 1)
+  if (normalizedTarget.getTime() === yesterday.getTime()) {
+    return 'Yesterday'
+  }
+  
+  // For everything else, use timeago.js
+  return format(date)
 }
 
 export function parseStorageDate(dateString: string): Date {
