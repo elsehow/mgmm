@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef, FormEvent } from 'react'
 import { Message, Conversation } from './lib/types/conversation'
+import ChatHeader from './components/ChatHeader/ChatHeader'
+import ChatMessage from './components/ChatMessage/ChatMessage'
+import ChatInput from './components/ChatInput/ChatInput'
 
 export default function Home() {
   const [message, setMessage] = useState('')
@@ -261,50 +264,32 @@ export default function Home() {
     setStreamingMessage('')
   }
 
-  const formatTimestamp = (timestamp: string | Date) => {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })
-  }
-
   return (
     <div className="chat-container">
-      <header className="chat-header">
-        <h1>Chat with Claude</h1>
-        <button onClick={startNewConversation} className="new-chat-btn">
-          New Chat
-        </button>
-      </header>
+      <ChatHeader 
+        title="Chat with Claude"
+        onNewChat={startNewConversation}
+      />
 
       <main className="chat-main">
         <div className="messages-container">
           {getAllMessages().map((msg) => (
-            <div key={msg.id} className={`message ${msg.role} ${msg.pending ? 'pending' : ''} ${msg.error ? 'error' : ''}`}>
-              <div className="message-content">
-                <div className="message-text">{msg.content}</div>
-                <div className="message-time">
-                  {msg.pending ? 'Sending...' : msg.error ? 'Failed' : formatTimestamp(msg.timestamp)}
-                  {msg.error && (
-                    <button 
-                      onClick={() => retryMessage(msg)}
-                      className="retry-button"
-                    >
-                      Retry
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+            <ChatMessage 
+              key={msg.id} 
+              message={msg}
+              onRetry={retryMessage}
+            />
           ))}
           
           {isStreaming && streamingMessage && (
-            <div className="message assistant">
-              <div className="message-content">
-                <div className="message-text">{streamingMessage}</div>
-                <div className="message-time">Now</div>
-              </div>
-            </div>
+            <ChatMessage 
+              message={{
+                id: 'streaming',
+                role: 'assistant',
+                content: streamingMessage,
+                timestamp: new Date()
+              }}
+            />
           )}
           
           <div ref={messagesEndRef} />
@@ -312,23 +297,13 @@ export default function Home() {
       </main>
 
       <footer className="chat-footer">
-        <form onSubmit={handleSubmit} className="chat-form">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type your message..."
-            disabled={isStreaming}
-            className="chat-input"
-          />
-          <button 
-            type="submit" 
-            disabled={isStreaming || !message.trim()}
-            className="chat-submit"
-          >
-            {isStreaming ? 'Sending...' : 'Send'}
-          </button>
-        </form>
+        <ChatInput
+          value={message}
+          onChange={setMessage}
+          onSubmit={handleSubmit}
+          disabled={isStreaming}
+          placeholder="Type your message..."
+        />
       </footer>
     </div>
   )
