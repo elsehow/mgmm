@@ -1,9 +1,9 @@
 interface ChatHeaderProps {
-  title: string
+  title?: string
   onNewChat: () => void
 }
 
-export default function ChatHeader({ title, onNewChat }: ChatHeaderProps) {
+export default function ChatHeader({ title = "Chat with Claude", onNewChat }: ChatHeaderProps) {
   return (
     <header className="chat-header">
       <h1>{title}</h1>

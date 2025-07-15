@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, FormEvent } from 'react'
 import { Message, Conversation } from './lib/types/conversation'
+import { createPendingMessage, createStreamingMessage } from './lib/messageHelpers'
 import ChatHeader from './components/ChatHeader/ChatHeader'
 import ChatMessage from './components/ChatMessage/ChatMessage'
 import ChatInput from './components/ChatInput/ChatInput'
@@ -37,14 +38,7 @@ export default function Home() {
     setStreamingMessage('')
     setIsStreaming(true)
 
-    const pendingMessage: Message = {
-      id: `pending-${Date.now()}`,
-      role: 'user',
-      content: userMessage,
-      timestamp: new Date(),
-      pending: true,
-      localOnly: true
-    }
+    const pendingMessage = createPendingMessage(userMessage)
 
     setOptimisticMessages(prev => [...prev, pendingMessage])
 
@@ -266,10 +260,7 @@ export default function Home() {
 
   return (
     <div className="chat-container">
-      <ChatHeader 
-        title="Chat with Claude"
-        onNewChat={startNewConversation}
-      />
+      <ChatHeader onNewChat={startNewConversation} />
 
       <main className="chat-main">
         <div className="messages-container">
@@ -282,14 +273,7 @@ export default function Home() {
           ))}
           
           {isStreaming && streamingMessage && (
-            <ChatMessage 
-              message={{
-                id: 'streaming',
-                role: 'assistant',
-                content: streamingMessage,
-                timestamp: new Date()
-              }}
-            />
+            <ChatMessage message={createStreamingMessage(streamingMessage)} />
           )}
           
           <div ref={messagesEndRef} />
@@ -302,7 +286,6 @@ export default function Home() {
           onChange={setMessage}
           onSubmit={handleSubmit}
           disabled={isStreaming}
-          placeholder="Type your message..."
         />
       </footer>
     </div>

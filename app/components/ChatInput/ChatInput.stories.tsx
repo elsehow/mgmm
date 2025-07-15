@@ -21,14 +21,12 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     value: '',
-    placeholder: 'Type your message...',
   },
 }
 
 export const WithText: Story = {
   args: {
     value: 'Hello, how are you?',
-    placeholder: 'Type your message...',
   },
 }
 
@@ -36,7 +34,6 @@ export const Disabled: Story = {
   args: {
     value: 'This message is being sent...',
     disabled: true,
-    placeholder: 'Type your message...',
   },
 }
 
