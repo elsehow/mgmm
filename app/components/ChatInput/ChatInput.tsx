@@ -1,38 +1,48 @@
-import { FormEvent } from 'react'
-import { CSS_CLASSES, MESSAGE_STATES, UI_CONFIG } from '@/app/config/constants'
+import { FormEvent, useRef, useEffect } from "react";
+import { CSS_CLASSES } from "@/app/config/constants";
 
 interface ChatInputProps {
-  value: string
-  onChange: (value: string) => void
-  onSubmit: (e: FormEvent) => void
-  disabled?: boolean
-  placeholder?: string
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: (e: FormEvent) => void;
+  disabled?: boolean;
 }
 
-export default function ChatInput({ 
-  value, 
-  onChange, 
-  onSubmit, 
-  disabled = false, 
-  placeholder = UI_CONFIG.CHAT.DEFAULT_PLACEHOLDER
+export default function ChatInput({
+  value,
+  onChange,
+  onSubmit,
+  disabled = false,
 }: ChatInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (inputRef.current && !disabled) {
+      inputRef.current.focus();
+    }
+  }, [disabled]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (value.trim()) {
+        onSubmit(e as any);
+      }
+    }
+  };
+
   return (
-    <form onSubmit={onSubmit} className={CSS_CLASSES.CHAT_FORM}>
+    <div className={CSS_CLASSES.CHAT_FORM}>
       <input
+        ref={inputRef}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
+        onKeyDown={handleKeyDown}
         disabled={disabled}
-        className={CSS_CLASSES.CHAT_INPUT}
+        className={`${CSS_CLASSES.CHAT_INPUT} ${value ? "" : "minimal-cursor"}`}
+        autoFocus
       />
-      <button 
-        type="submit" 
-        disabled={disabled || !value.trim()}
-        className={CSS_CLASSES.CHAT_SUBMIT}
-      >
-        {disabled ? MESSAGE_STATES.SENDING : MESSAGE_STATES.SEND}
-      </button>
-    </form>
-  )
+    </div>
+  );
 }
