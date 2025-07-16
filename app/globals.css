@@ -158,21 +158,16 @@ body {
 }
 
 .chat-footer {
-  padding: 0;
-  background-color: rgb(246, 246, 246);
-  border-top: none;
-  position: relative;
+  display: none;
 }
 
 .chat-form {
-  max-width: 700px;
-  margin: 0 auto;
   position: relative;
-  padding: 2rem;
+  margin: 0.5rem 0;
 }
 
 .chat-input {
-  width: 100%;
+  width: calc(100% - 80px);
   padding: 0;
   margin: 0;
   font-size: 1rem;
