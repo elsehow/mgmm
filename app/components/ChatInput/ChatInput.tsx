@@ -40,7 +40,7 @@ export default function ChatInput({
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
-        className={`${CSS_CLASSES.CHAT_INPUT} ${value ? "" : "minimal-cursor"}`}
+        className={CSS_CLASSES.CHAT_INPUT}
         autoFocus
       />
     </div>
