@@ -12,7 +12,6 @@ export interface Message {
 
 export interface Conversation {
   id: string
-  userId: string
   messages: Message[]
   createdAt: Date
   updatedAt: Date
@@ -20,7 +19,6 @@ export interface Conversation {
 
 export interface ConversationSummary {
   id: string
-  userId: string
   lastMessage?: string
   messageCount: number
   createdAt: Date

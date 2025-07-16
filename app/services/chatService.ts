@@ -4,7 +4,6 @@ import { Conversation } from '@/app/lib/types/conversation'
 export interface ChatRequest {
   message: string
   date?: string
-  userId?: string
 }
 
 export interface StreamHandlers {
@@ -24,7 +23,6 @@ export class ChatService {
       body: JSON.stringify({
         message: request.message,
         date: request.date,
-        userId: request.userId || API_CONFIG.USERS.DEFAULT_USER_ID,
       }),
     })
 
@@ -77,9 +75,9 @@ export class ChatService {
   }
 
 
-  async getConversationByDate(date: string, userId: string = API_CONFIG.USERS.DEFAULT_USER_ID): Promise<Conversation | null> {
+  async getConversationByDate(date: string): Promise<Conversation | null> {
     try {
-      const response = await fetch(`/api/conversations/by-date/${date}?userId=${userId}`)
+      const response = await fetch(`/api/conversations/by-date/${date}`)
       
       if (!response.ok) {
         return null
@@ -93,9 +91,9 @@ export class ChatService {
     }
   }
 
-  async getAvailableDates(userId: string = API_CONFIG.USERS.DEFAULT_USER_ID): Promise<string[]> {
+  async getAvailableDates(): Promise<string[]> {
     try {
-      const response = await fetch(`/api/conversations/dates?userId=${userId}`)
+      const response = await fetch(`/api/conversations/dates`)
       
       if (!response.ok) {
         return []

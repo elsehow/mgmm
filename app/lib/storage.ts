@@ -38,17 +38,13 @@ export class ConversationStorage {
 
 
 
-  async getConversationByDate(userId: string, date: Date): Promise<Conversation | null> {
+  async getConversationByDate(date: Date): Promise<Conversation | null> {
     const dateStr = this.formatDateForStorage(date)
     const filePath = this.getDateBasedPath(dateStr)
     
     try {
       const data = await fs.readFile(filePath, STORAGE_CONFIG.ENCODING)
       const conversation = JSON.parse(data) as Conversation
-      
-      if (conversation.userId !== userId) {
-        return null
-      }
       
       conversation.createdAt = new Date(conversation.createdAt)
       conversation.updatedAt = new Date(conversation.updatedAt)
@@ -66,13 +62,12 @@ export class ConversationStorage {
     }
   }
 
-  async createConversationForDate(userId: string, date: Date): Promise<Conversation> {
+  async createConversationForDate(date: Date): Promise<Conversation> {
     await this.ensureStorageDir()
     
     const dateStr = this.formatDateForStorage(date)
     const conversation: Conversation = {
       id: dateStr, // Use date as ID for date-based conversations
-      userId,
       messages: [],
       createdAt: date,
       updatedAt: date
@@ -84,7 +79,7 @@ export class ConversationStorage {
     return conversation
   }
 
-  async getAvailableDates(userId: string): Promise<string[]> {
+  async getAvailableDates(): Promise<string[]> {
     await this.ensureStorageDir()
     
     try {
@@ -102,7 +97,7 @@ export class ConversationStorage {
               const data = await fs.readFile(filePath, STORAGE_CONFIG.ENCODING)
               const conversation = JSON.parse(data) as Conversation
               
-              if (conversation.userId === userId && conversation.messages.length > 0) {
+              if (conversation.messages.length > 0) {
                 dates.push(fileName)
               }
             } catch (error) {
@@ -119,11 +114,11 @@ export class ConversationStorage {
     }
   }
 
-  async addMessageToDateConversation(userId: string, date: Date, role: 'user' | 'assistant', content: string): Promise<Message> {
-    let conversation = await this.getConversationByDate(userId, date)
+  async addMessageToDateConversation(date: Date, role: 'user' | 'assistant', content: string): Promise<Message> {
+    let conversation = await this.getConversationByDate(date)
     
     if (!conversation) {
-      conversation = await this.createConversationForDate(userId, date)
+      conversation = await this.createConversationForDate(date)
     }
 
     const message: Message = {
@@ -143,7 +138,7 @@ export class ConversationStorage {
     return message
   }
 
-  async getUserConversations(userId: string): Promise<ConversationSummary[]> {
+  async getAllConversations(): Promise<ConversationSummary[]> {
     await this.ensureStorageDir()
     
     try {
@@ -157,16 +152,13 @@ export class ConversationStorage {
             const data = await fs.readFile(filePath, STORAGE_CONFIG.ENCODING)
             const conversation = JSON.parse(data) as Conversation
             
-            if (conversation.userId === userId) {
-              summaries.push({
-                id: conversation.id,
-                userId: conversation.userId,
-                lastMessage: conversation.messages[conversation.messages.length - 1]?.content,
-                messageCount: conversation.messages.length,
-                createdAt: new Date(conversation.createdAt),
-                updatedAt: new Date(conversation.updatedAt)
-              })
-            }
+            summaries.push({
+              id: conversation.id,
+              lastMessage: conversation.messages[conversation.messages.length - 1]?.content,
+              messageCount: conversation.messages.length,
+              createdAt: new Date(conversation.createdAt),
+              updatedAt: new Date(conversation.updatedAt)
+            })
           } catch (error) {
             console.error(`Error reading conversation file ${file}:`, error)
           }

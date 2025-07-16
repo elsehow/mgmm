@@ -27,7 +27,7 @@ export default function DateNavigation({
             ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' 
             : 'bg-gray-50 text-gray-400 cursor-not-allowed'
         }`}
-        title="Previous day"
+        title="Previous chat"
       >
         ←
       </button>
@@ -44,7 +44,7 @@ export default function DateNavigation({
             ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' 
             : 'bg-gray-50 text-gray-400 cursor-not-allowed'
         }`}
-        title="Next day"
+        title="Next chat"
       >
         →
       </button>

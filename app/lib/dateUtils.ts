@@ -2,32 +2,8 @@ export function formatDateForStorage(date: Date): string {
   return date.toISOString().split('T')[0] // YYYY-MM-DD format
 }
 
-import { format } from 'timeago.js'
-
 export function formatRelativeDate(date: Date): string {
-  const today = new Date()
-  const targetDate = new Date(date)
-  
-  // Normalize dates to compare only date parts (not time)
-  const normalizeDate = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
-  
-  const normalizedToday = normalizeDate(today)
-  const normalizedTarget = normalizeDate(targetDate)
-  
-  // Check if it's today
-  if (normalizedTarget.getTime() === normalizedToday.getTime()) {
-    return 'Today'
-  }
-  
-  // Check if it's yesterday
-  const yesterday = new Date(normalizedToday)
-  yesterday.setDate(yesterday.getDate() - 1)
-  if (normalizedTarget.getTime() === yesterday.getTime()) {
-    return 'Yesterday'
-  }
-  
-  // For everything else, use timeago.js
-  return format(date)
+  return formatDateForStorage(date)
 }
 
 export function parseStorageDate(dateString: string): Date {
@@ -64,19 +40,30 @@ export function getToday(): Date {
 export function validateDateNavigation(currentDate: Date, availableDates: string[], direction: 'prev' | 'next'): Date | null {
   const currentDateStr = formatDateForStorage(currentDate)
   const sortedDates = availableDates.sort()
+  const currentIndex = sortedDates.indexOf(currentDateStr)
   
   if (direction === 'prev') {
-    // Find the previous date that has conversations
-    for (let i = sortedDates.length - 1; i >= 0; i--) {
-      if (sortedDates[i] < currentDateStr) {
-        return parseStorageDate(sortedDates[i])
+    // Get the previous chat (earlier in the sorted list)
+    if (currentIndex > 0) {
+      return parseStorageDate(sortedDates[currentIndex - 1])
+    } else if (currentIndex === -1 && sortedDates.length > 0) {
+      // Current date not in list, find closest previous date
+      for (let i = sortedDates.length - 1; i >= 0; i--) {
+        if (sortedDates[i] < currentDateStr) {
+          return parseStorageDate(sortedDates[i])
+        }
       }
     }
   } else {
-    // Find the next date that has conversations
-    for (let i = 0; i < sortedDates.length; i++) {
-      if (sortedDates[i] > currentDateStr) {
-        return parseStorageDate(sortedDates[i])
+    // Get the next chat (later in the sorted list)
+    if (currentIndex >= 0 && currentIndex < sortedDates.length - 1) {
+      return parseStorageDate(sortedDates[currentIndex + 1])
+    } else if (currentIndex === -1 && sortedDates.length > 0) {
+      // Current date not in list, find closest next date
+      for (let i = 0; i < sortedDates.length; i++) {
+        if (sortedDates[i] > currentDateStr) {
+          return parseStorageDate(sortedDates[i])
+        }
       }
     }
   }

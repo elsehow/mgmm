@@ -4,7 +4,7 @@ import { ChatService } from '@/app/services/chatService'
 
 const chatService = new ChatService()
 
-export function useDateNavigation(userId: string = 'default') {
+export function useDateNavigation() {
   const [currentDate, setCurrentDate] = useState<Date>(getToday())
   const [availableDates, setAvailableDates] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -12,7 +12,8 @@ export function useDateNavigation(userId: string = 'default') {
   const fetchAvailableDates = useCallback(async () => {
     try {
       setIsLoading(true)
-      const dates = await chatService.getAvailableDates(userId)
+      const dates = await chatService.getAvailableDates()
+      console.log('Fetched available dates:', dates)
       setAvailableDates(dates)
     } catch (error) {
       console.error('Error fetching available dates:', error)
@@ -20,7 +21,7 @@ export function useDateNavigation(userId: string = 'default') {
     } finally {
       setIsLoading(false)
     }
-  }, [userId])
+  }, [])
 
   const navigateToDate = useCallback((date: Date) => {
     setCurrentDate(date)

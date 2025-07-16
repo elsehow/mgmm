@@ -6,10 +6,7 @@ const storage = ConversationStorage.getInstance()
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId') || API_CONFIG.USERS.DEFAULT_USER_ID
-
-    const conversations = await storage.getUserConversations(userId)
+    const conversations = await storage.getAllConversations()
     
     return Response.json({ conversations })
   } catch (error) {

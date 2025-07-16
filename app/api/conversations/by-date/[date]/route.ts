@@ -6,8 +6,6 @@ const storage = ConversationStorage.getInstance()
 
 export async function GET(request: NextRequest, { params }: { params: { date: string } }) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId') || API_CONFIG.USERS.DEFAULT_USER_ID
     const { date } = params
 
     // Validate date format (YYYY-MM-DD)
@@ -19,7 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: { date: st
     }
 
     const dateObj = new Date(date + 'T00:00:00.000Z')
-    const conversation = await storage.getConversationByDate(userId, dateObj)
+    const conversation = await storage.getConversationByDate(dateObj)
     
     if (!conversation) {
       return Response.json(

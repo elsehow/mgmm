@@ -12,7 +12,7 @@ const storage = ConversationStorage.getInstance()
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, date, userId = API_CONFIG.USERS.DEFAULT_USER_ID } = await request.json()
+    const { message, date } = await request.json()
 
     if (!message) {
       return new Response(ERROR_MESSAGES.MESSAGE_REQUIRED, { status: HTTP_STATUS.BAD_REQUEST })
@@ -21,12 +21,12 @@ export async function POST(request: NextRequest) {
     let conversation
     const targetDate = date ? new Date(date + 'T00:00:00.000Z') : new Date()
     
-    conversation = await storage.getConversationByDate(userId, targetDate)
+    conversation = await storage.getConversationByDate(targetDate)
     if (!conversation) {
-      conversation = await storage.createConversationForDate(userId, targetDate)
+      conversation = await storage.createConversationForDate(targetDate)
     }
-    await storage.addMessageToDateConversation(userId, targetDate, 'user', message)
-    conversation = await storage.getConversationByDate(userId, targetDate)
+    await storage.addMessageToDateConversation(targetDate, 'user', message)
+    conversation = await storage.getConversationByDate(targetDate)
 
     if (!conversation) {
       return new Response(ERROR_MESSAGES.ERROR_RETRIEVING_CONVERSATION, { status: HTTP_STATUS.INTERNAL_SERVER_ERROR })
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
           }
           
           // Add assistant response to the conversation
-          await storage.addMessageToDateConversation(userId, targetDate, 'assistant', assistantResponse)
+          await storage.addMessageToDateConversation(targetDate, 'assistant', assistantResponse)
           
           controller.enqueue(encoder.encode(STREAMING_CONFIG.DONE_EVENT))
           controller.close()

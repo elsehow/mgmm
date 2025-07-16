@@ -8,10 +8,9 @@ global.createMockDate = (dateString) => {
   return new Date(dateString + 'T00:00:00.000Z')
 }
 
-global.createMockConversation = (id, userId, date, messages = []) => {
+global.createMockConversation = (id, date, messages = []) => {
   return {
     id,
-    userId,
     messages,
     createdAt: date,
     updatedAt: date,
