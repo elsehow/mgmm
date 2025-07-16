@@ -20,6 +20,37 @@ export default function ChatInput({
     if (inputRef.current && !disabled) {
       inputRef.current.focus();
     }
+  }, [disabled, value]); // Re-focus after value changes
+
+  // Keep focus on the input whenever it loses focus
+  useEffect(() => {
+    const handleFocus = () => {
+      if (inputRef.current && !disabled) {
+        inputRef.current.focus();
+      }
+    };
+
+    const handleBlur = () => {
+      // Refocus after a short delay to prevent conflicts
+      setTimeout(() => {
+        if (inputRef.current && !disabled) {
+          inputRef.current.focus();
+        }
+      }, 10);
+    };
+
+    const input = inputRef.current;
+    if (input) {
+      input.addEventListener("blur", handleBlur);
+      window.addEventListener("focus", handleFocus);
+    }
+
+    return () => {
+      if (input) {
+        input.removeEventListener("blur", handleBlur);
+        window.removeEventListener("focus", handleFocus);
+      }
+    };
   }, [disabled]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
