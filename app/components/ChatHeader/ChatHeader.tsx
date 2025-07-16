@@ -1,4 +1,3 @@
-import { CSS_CLASSES } from '@/app/config/constants'
 import DateNavigation from '../DateNavigation/DateNavigation'
 
 interface ChatHeaderProps {
@@ -15,7 +14,7 @@ export default function ChatHeader({
   onGoToToday 
 }: ChatHeaderProps) {
   return (
-    <header className={CSS_CLASSES.CHAT_HEADER}>
+    <header className="border-b bg-white p-4">
       <DateNavigation
         currentDate={currentDate}
         availableDates={availableDates}

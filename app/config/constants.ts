@@ -13,9 +13,6 @@ export const API_CONFIG = {
   MODELS: {
     CLAUDE_SONNET: 'claude-sonnet-4-20250514',
   },
-  USERS: {
-    DEFAULT_USER_ID: 'default-user',
-  },
   LIMITS: {
     MAX_TOKENS: 1024,
   },
@@ -78,31 +75,6 @@ export const STREAM_EVENTS = {
   CONTENT_BLOCK_DELTA: 'content_block_delta',
   DONE: '[DONE]',
   DATA_PREFIX: 'data: ',
-} as const
-
-// CSS Classes
-export const CSS_CLASSES = {
-  // Layout
-  CHAT_CONTAINER: 'chat-container',
-  CHAT_MAIN: 'chat-main',
-  CHAT_HEADER: 'chat-header',
-  CHAT_FOOTER: 'chat-footer',
-  MESSAGES_CONTAINER: 'messages-container',
-  
-  // Message
-  MESSAGE: 'message',
-  MESSAGE_CONTENT: 'message-content',
-  MESSAGE_TEXT: 'message-text',
-  MESSAGE_TIME: 'message-time',
-  
-  // Input
-  CHAT_FORM: 'chat-form',
-  CHAT_INPUT: 'chat-input',
-  CHAT_SUBMIT: 'chat-submit',
-  
-  // Buttons
-  NEW_CHAT_BTN: 'new-chat-btn',
-  RETRY_BUTTON: 'retry-button',
 } as const
 
 // Storage Configuration

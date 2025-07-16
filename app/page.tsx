@@ -3,7 +3,6 @@
 import { useEffect, useRef, FormEvent } from 'react'
 import { useChat } from './hooks/useChat'
 import { createStreamingMessage } from './lib/messageHelpers'
-import { UI_CONFIG, CSS_CLASSES } from './config/constants'
 import ChatHeader from './components/ChatHeader/ChatHeader'
 import ChatMessage from './components/ChatMessage/ChatMessage'
 import ChatInput from './components/ChatInput/ChatInput'
@@ -26,7 +25,7 @@ export default function Home() {
   } = useChat()
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: UI_CONFIG.CHAT.SCROLL_BEHAVIOR })
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
   useEffect(() => {
@@ -39,7 +38,7 @@ export default function Home() {
   }
 
   return (
-    <div className={CSS_CLASSES.CHAT_CONTAINER}>
+    <div className="flex flex-col h-screen bg-gray-50">
       <ChatHeader 
         currentDate={currentDate}
         availableDates={availableDates}
@@ -47,8 +46,8 @@ export default function Home() {
         onGoToToday={goToToday}
       />
 
-      <main className={CSS_CLASSES.CHAT_MAIN}>
-        <div className={CSS_CLASSES.MESSAGES_CONTAINER}>
+      <main className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto p-4 space-y-4">
           {allMessages.map((msg) => (
             <ChatMessage 
               key={msg.id} 
@@ -65,7 +64,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className={CSS_CLASSES.CHAT_FOOTER}>
+      <footer className="border-t bg-white p-4">
         <ChatInput
           value={message}
           onChange={setMessage}
