@@ -206,4 +206,5 @@ body {
 /* Cursor styling */
 .chat-input {
   caret-color: rgb(0, 197, 255);
+  caret-width: 4px;
 }
