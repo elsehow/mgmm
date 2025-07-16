@@ -203,33 +203,7 @@ body {
   cursor: not-allowed;
 }
 
-/* Flashing cursor */
-.chat-input:focus:empty {
-  position: relative;
-}
-
-.chat-input:focus:empty::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background-color: rgb(0, 197, 255);
-  animation: blink 1s infinite;
-}
-
-.chat-input:focus {
+/* Cursor styling */
+.chat-input {
   caret-color: rgb(0, 197, 255);
-}
-
-@keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
-  }
 }
